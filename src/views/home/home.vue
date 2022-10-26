@@ -5,7 +5,8 @@
            class="index-word">我的购物街
       </div>
     </navBar>
-    <scroll class="content">
+    <scroll ref="scroll" :probeType="3" :pullUpLoad="true" class="content" @pullingUp="loadMore"
+            @scroll="ContentScroll">
       <homeSwiper :banners="banners"></homeSwiper>
       <home-rec-view :rec="recommend"></home-rec-view>
       <home-feature-view></home-feature-view>
@@ -13,19 +14,24 @@
                    @tabClick="tabClick"></tab-control>
       <product-list :productMessage="changeList"></product-list>
     </scroll>
+    <!-- 组件点击-->
+    <back-top v-show="isShow" @click.native="TopClick"></back-top>
   </div>
 </template>
 <script>
+
 import HomeRecView from './childComs/HomeRecView.vue'
 import HomeFeatureView from './childComs/FeatureView.vue'
-import {getHomeData, getHomeProducts} from 'network/home.js'
-
 import navBar from 'components/common/navbar/NavBar'
 import homeSwiper from './childComs/homeSwiper'
 import tabControl from "components/content/tabControl/tabControl"
 import TabControl from '../../components/content/tabControl/tabControl.vue'
 import productList from 'components/content/HomeProduct/productList'
 import scroll from "components/common/scroll/scroll";
+import backTop from "components/content/BackTop/BackTop";
+
+import {getHomeData, getHomeProducts} from 'network/home.js'
+import {debounce} from 'components/common/utils'
 
 export default {
   name: 'home',
@@ -38,6 +44,7 @@ export default {
     TabControl,
     productList,
     scroll,
+    backTop
 
   },
   data() {
@@ -58,7 +65,8 @@ export default {
           list: [],
         }
       },
-      currentType: 'pop'
+      currentType: 'pop',
+      isShow: false
     }
   },
   created() {
@@ -68,6 +76,14 @@ export default {
     this.CgetHomeProducts('new')
 
 
+  },
+  mounted() {
+    //$refs需在组件创建完成后读取才会正常
+    const refresh = debounce(this.$refs.scroll.refresh, 400)
+
+    this.$bus.$on('itemLoad', () => {
+      refresh()
+    })
   },
   computed: {
     changeList() {
@@ -92,6 +108,19 @@ export default {
           break;
       }
     },
+    TopClick() {
+      this.$refs.scroll.backTop(0, 0, 400)
+    },
+    ContentScroll(position) {
+      // 1
+      // -position.y >= 1000 ? this.isShow = true : this.isShow = false
+      // 2
+      this.isShow = -position.y >= 1000
+    },
+    loadMore() {
+      this.CgetHomeProducts(this.currentType)
+      console.log('loading')
+    },
 
     // Internet request
     CgetHomeData() {
@@ -107,8 +136,10 @@ export default {
       getHomeProducts(type, page).then(res => {
         this.product[type].list.push(...res.data.list)
         this.product[type].page += 1
+        this.$refs.scroll.finishPullUp()
       })
-    }
+    },
+
   }
 }
 </script>

@@ -1,10 +1,10 @@
 <template>
   <div class="proItem">
-    <img :src="productInfo.show.img">
+    <img :src="productInfo.show.img" @load="imageLoad">
     <div class='itemMessage'>
-      <p>{{productInfo.title}}</p>
-      <span class="price">{{productInfo.price}}</span>
-      <span class="collect">{{productInfo.cfav}}</span>
+      <p>{{ productInfo.title }}</p>
+      <span class="price">{{ productInfo.price }}</span>
+      <span class="collect">{{ productInfo.cfav }}</span>
     </div>
   </div>
 </template>
@@ -14,9 +14,17 @@ export default {
   props: {
     productInfo: {
       type: Object,
-      default () {
+      default() {
         return {}
       }
+    }
+  },
+  methods: {
+    //监听每个图片当加载完成后再次刷新bscroll
+    // 利用vue中的@load
+    imageLoad() {
+      //  利用事件总线将该方法传至home组件（新建一个vue实例$bus）
+      this.$bus.$emit('itemLoad')
     }
   }
 }
@@ -27,10 +35,12 @@ export default {
   position: relative;
   width: 48%;
 }
+
 .proItem img {
   width: 100%;
   border-radius: 5px;
 }
+
 .itemMessage {
   font-size: 12px;
   position: absolute;
@@ -40,19 +50,23 @@ export default {
   overflow: hidden;
   text-align: center;
 }
+
 .itemMessage p {
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
   margin-bottom: 3px;
 }
+
 .itemMessage .price {
   color: var(--color-high-text);
   margin-right: 20px;
 }
+
 .itemMessage .collect {
   position: relative;
 }
+
 .itemMessage .collect::before {
   content: '';
   position: absolute;
