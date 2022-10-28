@@ -5,13 +5,21 @@
            class="index-word">我的购物街
       </div>
     </navBar>
+    <tab-control v-show="isFixed"
+                 ref="tabControl2"
+                 :tabText="['流行','新款','精选']"
+                 class="hiddenTab"
+                 @tabClick="tabClick"
+    ></tab-control>
     <scroll ref="scroll" :probeType="3" :pullUpLoad="true" class="content" @pullingUp="loadMore"
             @scroll="ContentScroll">
-      <homeSwiper :banners="banners"></homeSwiper>
+      <homeSwiper :banners="banners" @SwiperImageLoad="SwiperLoad"></homeSwiper>
       <home-rec-view :rec="recommend"></home-rec-view>
       <home-feature-view></home-feature-view>
-      <tab-control :tabText="['流行','新款','精选']"
-                   @tabClick="tabClick"></tab-control>
+      <tab-control ref="tabControl"
+                   :tabText="['流行','新款','精选']"
+                   @tabClick="tabClick"
+      ></tab-control>
       <product-list :productMessage="changeList"></product-list>
     </scroll>
     <!-- 组件点击-->
@@ -66,7 +74,9 @@ export default {
         }
       },
       currentType: 'pop',
-      isShow: false
+      isShow: false,
+      isFixed: false,
+      savePos: null
     }
   },
   created() {
@@ -79,11 +89,18 @@ export default {
   },
   mounted() {
     //$refs需在组件创建完成后读取才会正常
-    const refresh = debounce(this.$refs.scroll.refresh, 400)
-
+    const refresh = debounce(this.$refs.scroll.refresh, 100)
     this.$bus.$on('itemLoad', () => {
       refresh()
     })
+  },
+  activated() {
+    this.$refs.scroll.backTop(0, this.savePos, 0)
+    this.$refs.scroll.refresh()
+  },
+  deactivated() {
+    this.savePos = this.$refs.scroll.scroll.y
+
   },
   computed: {
     changeList() {
@@ -107,6 +124,8 @@ export default {
           'pop'
           break;
       }
+      this.$refs.tabControl.currentIndex = index
+      this.$refs.tabControl2.currentIndex = index
     },
     TopClick() {
       this.$refs.scroll.backTop(0, 0, 400)
@@ -115,13 +134,18 @@ export default {
       // 1
       // -position.y >= 1000 ? this.isShow = true : this.isShow = false
       // 2
+      //回到顶部显示
       this.isShow = -position.y >= 1000
+      // 是否吸顶
+      this.isFixed = -position.y >= this.$refs.tabControl.$el.offsetTop
     },
     loadMore() {
       this.CgetHomeProducts(this.currentType)
-      console.log('loading')
+      // console.log('loading')
     },
-
+    SwiperLoad() {
+      console.log()
+    },
     // Internet request
     CgetHomeData() {
       getHomeData().then(res => {
@@ -145,7 +169,6 @@ export default {
 </script>
 <style scoped>
 #home {
-  /*padding-top: 44px;*/
   height: 100vh;
   position: relative;
 }
@@ -153,23 +176,25 @@ export default {
 
 .index-color {
   background-color: var(--color-tint);
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  z-index: 10;
 }
 
 .index-word {
   color: #fff;
+
 }
 
 .content {
-  /*overflow: hidden;*/
+  overflow: hidden;
   position: absolute;
   top: 44px;
   bottom: 49px;
   left: 0;
   right: 0;
+}
+
+.hiddenTab {
+  position: relative;
+  top: 0;
+  z-index: 5;
 }
 </style>

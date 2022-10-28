@@ -20,15 +20,19 @@ export default {
 </script>
 <style scoped>
 .nav-bar {
+  /*margin-top: 10px;*/
   line-height: 44px;
+  height: 44px;
   display: flex;
   box-shadow: 0 1px 1px rgba(100, 100, 100, 0.1);
   text-align: center;
 }
+
 .left,
 .right {
   width: 60px;
 }
+
 .center {
   flex: 1;
 }

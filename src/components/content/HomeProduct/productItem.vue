@@ -1,5 +1,5 @@
 <template>
-  <div class="proItem">
+  <div class="proItem" @click="itemClick">
     <img :src="productInfo.show.img" @load="imageLoad">
     <div class='itemMessage'>
       <p>{{ productInfo.title }}</p>
@@ -25,6 +25,9 @@ export default {
     imageLoad() {
       //  利用事件总线将该方法传至home组件（新建一个vue实例$bus）
       this.$bus.$emit('itemLoad')
+    },
+    itemClick() {
+      this.$router.push('/detail/' + this.productInfo.iid)
     }
   }
 }
