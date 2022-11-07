@@ -11,7 +11,11 @@
                  class="hiddenTab"
                  @tabClick="tabClick"
     ></tab-control>
-    <scroll ref="scroll" :probeType="3" :pullUpLoad="true" class="content" @pullingUp="loadMore"
+    <scroll ref="scroll"
+            :probeType="3"
+            :pullUpLoad="true"
+            class="content"
+            @pullingUp="loadMore"
             @scroll="ContentScroll">
       <homeSwiper :banners="banners" @SwiperImageLoad="SwiperLoad"></homeSwiper>
       <home-rec-view :rec="recommend"></home-rec-view>
@@ -20,10 +24,13 @@
                    :tabText="['流行','新款','精选']"
                    @tabClick="tabClick"
       ></tab-control>
-      <product-list :productMessage="changeList"></product-list>
+      <product-list
+        :productMessage="changeList"></product-list>
     </scroll>
     <!-- 组件点击-->
-    <back-top v-show="isShow" @click.native="TopClick"></back-top>
+    <back-top
+      v-show="isShow"
+      @click.native="TopClick"></back-top>
   </div>
 </template>
 <script>
